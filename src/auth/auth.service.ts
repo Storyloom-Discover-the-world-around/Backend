@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   BadRequestException,
+  Body,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthDto } from './dto/auth.dto';
+import { AuthDto, RefreshTokenDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
@@ -17,7 +17,7 @@ export class AuthService {
   ) {}
 
   async signup(body: AuthDto) {
-    const existingUser = await this.userService.findByUsername(body.username);
+    const existingUser = await this.userService.findByEmail(body.email);
     if (existingUser) {
       throw new BadRequestException('User already exists');
     }
@@ -30,11 +30,11 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    return { message: 'User created successfully', userId: user.id };
+    return { message: 'User created successfully', user: user };
   }
 
   async login(body: AuthDto) {
-    const user = await this.userService.findByUsername(body.username);
+    const user = await this.userService.findByEmail(body.email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -49,8 +49,24 @@ export class AuthService {
       username: user.username,
     };
 
-    const token = await this.jwtService.signAsync(payload);
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_ACCESS_SECRET,
+      expiresIn: '1d',
+    });
 
-    return { access_token: token };
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_REFRESH_SECRET,
+      expiresIn: '7d',
+    });
+
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      user: user,
+    };
+  }
+
+  refresh(body: RefreshTokenDto) {
+    return { body };
   }
 }

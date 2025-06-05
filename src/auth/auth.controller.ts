@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Get, Query } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { AuthDto } from './dto/auth.dto';
+import { AuthDto, RefreshTokenDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
 
 @ApiTags('Auth')
@@ -20,16 +20,15 @@ export class AuthController {
     return this.authService.login(body);
   }
 
-  @Post('logout')
-  logout() {
-    return { message: 'User logged out' };
-  }
-
   @Post('refresh')
-  refreshToken(@Body() body: { refreshToken: string }) {
-    return { message: 'Token refreshed', body, token: 'new-access-token' };
+  refresh(@Body() body: RefreshTokenDto) {
+    return this.authService.refresh(body);
   }
 
+  @Post('logout')
+  logout(@Body('userId') userId: string) {
+    return { userId };
+  }
   // --- Google OAuth ---
   @Get('google')
   googleLogin() {

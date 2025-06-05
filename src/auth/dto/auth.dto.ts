@@ -10,3 +10,11 @@ export class AuthDto {
   @ApiProperty()
   password: string;
 }
+
+export class RefreshTokenDto {
+  @ApiProperty()
+  userId: string;
+
+  @ApiProperty()
+  refreshToken: string;
+}
