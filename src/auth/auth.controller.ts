@@ -1,19 +1,64 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query } from '@nestjs/common';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { AuthDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
-import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('auth')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  signup(@Body() body: { username: string; password: string }) {
-    return this.authService.signup(body.username, body.password);
+  @ApiBody({ type: AuthDto })
+  signup(@Body() body: AuthDto) {
+    return this.authService.signup(body);
   }
 
   @Post('login')
-  login(@Body() body: { username: string; password: string }) {
-    return this.authService.login(body.username, body.password);
+  @ApiBody({ type: AuthDto })
+  login(@Body() body: AuthDto) {
+    return this.authService.login(body);
+  }
+
+  @Post('logout')
+  logout() {
+    return { message: 'User logged out' };
+  }
+
+  @Post('refresh')
+  refreshToken(@Body() body: { refreshToken: string }) {
+    return { message: 'Token refreshed', body, token: 'new-access-token' };
+  }
+
+  // --- Google OAuth ---
+  @Get('google')
+  googleLogin() {
+    return { message: 'Redirect to Google Login URL' };
+  }
+
+  @Get('google/callback')
+  googleCallback(@Query() query: string) {
+    return { message: 'Handle Google callback', query };
+  }
+
+  @Post('google/token')
+  googleLoginWithToken(@Body() body: { idToken: string }) {
+    return { message: 'Google token received', token: body.idToken };
+  }
+
+  // --- Apple OAuth ---
+  @Get('apple')
+  appleLogin() {
+    return { message: 'Redirect to Apple Login URL' };
+  }
+
+  @Get('apple/callback')
+  appleCallback(@Query() query: string) {
+    return { message: 'Handle Apple callback', query };
+  }
+
+  @Post('apple/token')
+  appleLoginWithToken(@Body() body: { identityToken: string }) {
+    return { message: 'Apple token received', token: body.identityToken };
   }
 }
