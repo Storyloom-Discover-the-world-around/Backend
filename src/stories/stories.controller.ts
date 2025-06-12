@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Controller, Get, Post, Body, Query } from '@nestjs/common';
 import { StoriesService } from './stories.service';
 import { CreateStoryDto } from './dto/create-story.dto';
@@ -16,5 +17,10 @@ export class StoriesController {
   findAll(@Query('page') page = '1', @Query('limit') limit = '10') {
     console.log(page, limit);
     return this.storiesService.findAll();
+  }
+
+  @Get('search')
+  searchStories(@Query('q') query: string) {
+    return this.storiesService.search(query);
   }
 }

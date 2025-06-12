@@ -22,4 +22,28 @@ export class StoriesService {
   findAll(): Promise<Story[]> {
     return this.prisma.story.findMany();
   }
+
+  search(query: string) {
+    if (!query || query.trim() === '') {
+      return [];
+    }
+
+    return this.prisma.story.findMany({
+      where: {
+        OR: [
+          {
+            title: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            tags: {
+              has: query.toLowerCase(), // exact match in array
+            },
+          },
+        ],
+      },
+    });
+  }
 }
