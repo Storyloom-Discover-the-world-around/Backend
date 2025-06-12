@@ -28,3 +28,16 @@ model Story {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+
+enum SubscriberType {
+  CONTACT
+  SUBMIT
+}
+
+model Subscriber {
+  id        String          @id @default(cuid())
+  email     String          @unique
+  type      SubscriberType
+  createdAt DateTime        @default(now())
+}
